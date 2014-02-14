@@ -1,24 +1,3 @@
-					      .
-
-					      |
-				     .               /
-				      \       I
-						  /
-					\  ,g88R_
-					  d888(`  ).                   _
-				 -  --==  888(     ).=--           .+(`  )`.
-				)         Y8P(       '`.          :(   .    )
-					.+(`(      .   )     .--  `.  (    ) )
-				       ((    (..__.:'-'   .=(   )   ` _`  ) )
-				`.     `(       ) )       (   .  )     (   )  ._
-				  )      ` __.:'   )     (   (   ))     `-'.:(`  )
-				)  )  ( )       --'       `- __.'         :(      ))
-				.-'  (_.'          .')                    `(    )  ))
-						  (_  )                     ` __.:'
-
-				--..,___.--,--'`,---..-.--+--.,,-,,..._.--..-._.-a:f--.
-
-
 
 ### saranyu
 
@@ -84,6 +63,3 @@ Saranyu was extracted from [cluppet](http://github.com/mixradio/cluppet)
 ## License
 
 [Saranyu is released under the 3-clause license ("New BSD License" or "Modified BSD License")](https://raw.github.com/mixradio/saranyu/master/resources/LICENSE.txt).
-
-
-(Ascii art borrowed from http://ascii.co.uk/art/clouds)
