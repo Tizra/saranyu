@@ -1,5 +1,6 @@
 (defproject saranyu "0.0.1"
   :description "A signature generating library for AWS APIs"
+  :url "https://github.com/mixradio/saranyu"
   :license {:name "New BSD License or Modified BSD License"
             :url "https://raw.github.com/mixradio/saranyu/master/resources/LICENSE.txt"}
   :dependencies [[org.clojure/clojure "1.5.1"]
