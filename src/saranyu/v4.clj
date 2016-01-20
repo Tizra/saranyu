@@ -3,8 +3,7 @@
    [saranyu
     [util :refer :all]
     [crypto :refer :all]]
-   [clojure.string :refer [join lower-case upper-case trim split]]
-   [clojure.tools.logging :as log])
+   [clojure.string :refer [join lower-case upper-case trim split]])
   (:import
    [java.net URL]))
 
@@ -43,8 +42,6 @@
                            (canonical-headers headers) new-line
                            (signed-headers headers) new-line
                            (hex (sha-256 body)))]
-    (log/debug "V4: Query string parameters are " q-string )
-    (log/debug "V4: Canonical request is " canon-request)
     (->
      canon-request
      (sha-256)
@@ -62,7 +59,6 @@
                       (lower-case (first endpoint))
                       "/"
                       "aws4_request")]
-    (log/debug "V4: Credentials scope is " cr-scope)
     cr-scope))
 
 (defn- string-to-sign
@@ -71,14 +67,13 @@
                          time new-line
                          (credential-scope host time) new-line
                          v4-request)]
-   (log/debug "V4: String to sign is " str-to-sign)
     str-to-sign))
 
 (defn- signing-key
-  [host time]
+  [host time secret]
   (let [parts (split (credential-scope host time) #"/")]
     (->>
-     (calculate-hmac (nth parts 0) (get-mac-sha256 (to-bytes (str "AWS4" *secret*))))
+     (calculate-hmac (nth parts 0) (get-mac-sha256 (to-bytes (str "AWS4" secret))))
      (get-mac-sha256)
      (calculate-hmac (nth parts 1))
      (get-mac-sha256)
@@ -88,7 +83,7 @@
 
 (defn- auth-headers
   "Returns the version 4 signature authorisation headers"
-  [{:keys [url method content-type headers body]}]
+  [{:keys [url method content-type headers body key secret]}]
   (let [opts (parse-url url)
         host (:host opts)
         time (ISO8601-time)
@@ -103,12 +98,9 @@
                      time
                      (canonical-request method (:path opts) (:query opts) headers body))
         signature (hex (calculate-hmac sign-string (get-mac-sha256 s-key)))]
-    (log/debug "V4: Headers are " headers)
-    (log/debug "V4: Sign string is " sign-string)
-    (log/debug "V4: Signature is " signature)
     (merge (keys-as-string headers) {"Authorization" (str v4-algorithm
                                                           " Credential="
-                                                          *key*
+                                                          key
                                                           "/"
                                                           (credential-scope host time)
                                                           ", SignedHeaders="
@@ -135,7 +127,6 @@
 (defn sign
   "http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html"
   [{:keys [url method] :as request}]
-  (log/debug "V4: Processing signature for url : " url)
   (let [request (-> request
                     add-query-string
                     add-default-method)

@@ -3,7 +3,6 @@
    [saranyu
     [util :refer :all]
     [crypto :refer :all]]
-   [clojure.tools.logging :as log]
    [clojure.string :refer [split join upper-case trim lower-case]])
   (:import
    [java.net URL]))
@@ -56,8 +55,6 @@
   [request]
   (let [headers-str (amz-headers-str (without-nils (request :headers)))
         canon-path (canonical-path (request :url))]
-    (log/debug "S3: Headers string is " headers-str)
-    (log/debug "S3: Canonical Path is " canon-path)
     (str (upper-case (name (request :method))) new-line
          new-line
          (request :content-type) new-line
@@ -67,30 +64,27 @@
 
 (defn- s3-header
   "Gets the S3 Authorisation header for the given url"
-  [request]
+  [{:keys [secret key session-token] :as auth-info} request]
   (let [str-to-sign (string-to-sign request)
         signature (base64 (calculate-hmac str-to-sign (get-mac-sha1 *secret*)))
-        signature-string (str "AWS " *key* ":" signature)]
-    (log/debug "S3: String to Sign is " str-to-sign)
-    (log/debug "S3: Signature String is " signature-string)
+        signature-string (str "AWS " key ":" signature)]
     {"Authorization" signature-string}))
 
 (defn- auth-headers
-  ([request]
+  ([{:keys secret key session-token :as auth-info} request]
      (let [date (rfc2616-time)
            headers (without-nils {"x-amz-date" date
-                                  "x-amz-security-token" *session-token*})]
-       (merge headers (s3-header (merge request {:headers headers}))))))
+                                  "x-amz-security-token" session-token})]
+       (merge headers (s3-header auth-info (merge request {:headers headers}))))))
 
 (defn sign
   "http://s3.amazonaws.com/doc/s3-developer-guide/RESTAuthentication.html"
-  [{:keys [url method content-type] :as req}]
-  (log/debug "S3: Processing S3 signature for url : " url)
+  ([{:keys [url method content-type] :as req} auth-info]
   (let [method (or method :get)
         content-type (if (and (= method :put) (nil? content-type))
                        "application/xml"
                        content-type)
-        headers (auth-headers (-> req
+        headers (auth-headers auth-info (-> req
                                   (assoc :method method)
                                   (assoc :content-type content-type)))]
     (without-nils {:url url
@@ -98,3 +92,6 @@
                    :headers headers
                    :body (req :body)
                    :content-type content-type})))
+  ([{:keys [url method content-type secret key session-token] :as req}]
+    (sign (dissoc req :secret :key :session-token)
+          {:key key :secret secret :session-token session-token})))

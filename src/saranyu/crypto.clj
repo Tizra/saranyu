@@ -1,7 +1,6 @@
 (ns saranyu.crypto
   (:require
-   [saranyu.util :refer :all]
-   [clojure.tools.logging :as log])
+   [saranyu.util :refer :all])
   (:import
    [java.net URL]
    [java.net URLEncoder]
@@ -10,11 +9,6 @@
    [java.security MessageDigest]
    [org.apache.commons.codec.binary Base64]
    [org.apache.commons.codec.binary Hex]))
-
-(def ^:dynamic *key* nil)
-(def ^:dynamic *secret* nil)
-;Need to supply this for S3 requests when we use STS credentials via IAM roles
-(def ^:dynamic *session-token* nil)
 
 (def ^:const hmac-sha256-algorithm  "HmacSHA256")
 (def ^:const hmac-sha1-algorithm  "HmacSHA1")

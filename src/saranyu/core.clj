@@ -32,10 +32,7 @@
   "Generates the signature for the url using the given options and returns a map of request details,
    the caller can use to interact with the AWS API."
   [request]
-  (binding [crypto/*key*  (:key request)
-            crypto/*secret* (:secret request)
-            crypto/*session-token* (:session-token request)]
-    (cond
-     (v2? request) (v2/sign request)
-     (s3? request) (s3/sign request)
-     :else (v4/sign request))))
+  (cond
+   (v2? request) (v2/sign request)
+   (s3? request) (s3/sign request)
+   :else (v4/sign request)))
